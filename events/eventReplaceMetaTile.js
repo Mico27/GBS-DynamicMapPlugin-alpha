@@ -56,6 +56,6 @@ export const compile = (input, helpers) => {
   _stackPush(tmp1);
   _stackPush(tmp0);
   		
-  _callNative("replace_meta_tile");
+  _callNative("vm_replace_meta_tile");
   _stackPop(3);   
 };

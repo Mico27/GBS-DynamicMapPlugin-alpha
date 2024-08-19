@@ -220,90 +220,85 @@ void scroll_queue_col(UBYTE x, UBYTE y) BANKED {
 void scroll_load_pending_row(void) BANKED {
     UBYTE width = MIN(pending_w_i, PENDING_BATCH_SIZE);
     // DMG Row Load
-	MemcpyBanked(tile_buffer, image_ptr + ((pending_w_y * image_tile_width) + pending_w_x), width, image_bank);
-	if (curr_meta_tile_bank){
-		uint16_t vram_offset;
-		for (UBYTE i; i < width; i++) {
-			vram_offset = VRAM_OFFSET(pending_w_x + i, pending_w_y);
-			memcpy(sram_map_data + vram_offset, tile_buffer + i, 1);		
-			tile_buffer[i] = get_metatile_tile_id(vram_offset);
+	MemcpyBanked(tile_buffer, image_ptr + (UWORD)((pending_w_y * image_tile_width) + pending_w_x), width, image_bank);
+	if (metatile_bank){
+		for (UBYTE i = 0; i < width; i++) {
+			sram_map_data[VRAM_OFFSET(pending_w_x + i, pending_w_y)] = tile_buffer[i];
+			tile_buffer[i] = ReadBankedUBYTE(metatile_ptr + tile_buffer[i], metatile_bank);
 		}
 	}
-	set_bkg_tiles((pending_w_x) & 31, (pending_w_y) & 31, width, 1, tile_buffer);
+	set_bkg_tiles(pending_w_x & 31, pending_w_y & 31, width, 1, tile_buffer);
+	
+
 #ifdef CGB
-    if (_is_CGB) {  // Color Row Load
-        VBK_REG = 1;
-		if (curr_meta_tile_bank){
+    if (_is_CGB) {  // Color Column Load
+        VBK_REG = 1;		
+		if (metatile_attr_bank){
 			for (UBYTE i = 0; i < width; i++) {
-				tile_buffer[i] = get_metatile_attr(VRAM_OFFSET(pending_w_x + i, pending_w_y));
+				tile_buffer[i] = ReadBankedUBYTE(metatile_attr_ptr + sram_map_data[VRAM_OFFSET(pending_w_x + i, pending_w_y)], metatile_attr_bank);
 			}
 		} else {
-			MemcpyBanked(tile_buffer, image_attr_ptr + ((pending_w_y * image_tile_width) + pending_w_x), width, image_attr_bank);
+			MemcpyBanked(tile_buffer, image_attr_ptr + (UWORD)((pending_w_y * image_tile_width) + pending_w_x), width, image_attr_bank);
 		}
-		set_bkg_tiles((pending_w_x) & 31, (pending_w_y) & 31, width, 1, tile_buffer);
+		set_bkg_tiles(pending_w_x & 31, pending_w_y & 31, width, 1, tile_buffer);
         VBK_REG = 0;
     }
-#endif
+#endif	
     pending_w_x += width;
     pending_w_i -= width;
 }
 
 void scroll_load_row(UBYTE x, UBYTE y) BANKED {
 	UBYTE width = MIN(SCREEN_TILE_REFRES_W, image_tile_width);
-
     // DMG Row Load
-	MemcpyBanked(tile_buffer, image_ptr + ((y * image_tile_width) + x), width, image_bank);
-	if (curr_meta_tile_bank){
-		uint16_t vram_offset;
-		for (UBYTE i; i < width; i++) {
-			vram_offset = VRAM_OFFSET(x + i, y);
-			memcpy(sram_map_data + vram_offset, tile_buffer + i, 1);		
-			tile_buffer[i] = get_metatile_tile_id(vram_offset);
+	MemcpyBanked(tile_buffer, image_ptr + (UWORD)((y * image_tile_width) + x), width, image_bank);
+	if (metatile_bank){
+		for (UBYTE i = 0; i < width; i++) {
+			sram_map_data[VRAM_OFFSET(x + i, y)] = tile_buffer[i];
+			tile_buffer[i] = ReadBankedUBYTE(metatile_ptr + tile_buffer[i], metatile_bank);
 		}
 	}
-	set_bkg_tiles((x) & 31, (y) & 31, width, 1, tile_buffer);
+	set_bkg_tiles(x & 31, y & 31, width, 1, tile_buffer);
 	
 #ifdef CGB
     if (_is_CGB) {  // Color Column Load
         VBK_REG = 1;		
-		if (curr_meta_tile_bank){
+		if (metatile_attr_bank){
 			for (UBYTE i = 0; i < width; i++) {
-				tile_buffer[i] = get_metatile_attr(VRAM_OFFSET(x + i, y));
+				tile_buffer[i] = ReadBankedUBYTE(metatile_attr_ptr + sram_map_data[VRAM_OFFSET(x + i, y)], metatile_attr_bank);
 			}
 		} else {
-			MemcpyBanked(tile_buffer, image_attr_ptr + ((y * image_tile_width) + x), width, image_attr_bank);
+			MemcpyBanked(tile_buffer, image_attr_ptr + (UWORD)((y * image_tile_width) + x), width, image_attr_bank);
 		}
-		set_bkg_tiles((x) & 31, (y) & 31, width, 1, tile_buffer);
+		set_bkg_tiles(x & 31, y & 31, width, 1, tile_buffer);
         VBK_REG = 0;
     }
 #endif
 }
 
 void scroll_load_col(UBYTE x, UBYTE y, UBYTE height) BANKED {	
-
-    // DMG Column Load
-	uint16_t vram_offset;
-	for (UBYTE i; i < height; i++) {		
-		MemcpyBanked(tile_buffer + i, image_ptr + (((i + y) * image_tile_width) + x), 1, image_bank);
-		if (curr_meta_tile_bank){
-			vram_offset = VRAM_OFFSET(x, y + i);
-			memcpy(sram_map_data + vram_offset, tile_buffer + i, 1);
-			tile_buffer[i] = get_metatile_tile_id(vram_offset);
+	// DMG Column Load	
+	for (UBYTE i = 0; i < height; i++) {	
+		tile_buffer[i] = ReadBankedUBYTE(image_ptr + (UWORD)(((i + y) * image_tile_width) + x), image_bank);
+		if (metatile_bank){
+			sram_map_data[VRAM_OFFSET(x, y + i)] = tile_buffer[i];
+			tile_buffer[i] = ReadBankedUBYTE(metatile_ptr + tile_buffer[i], metatile_bank);	
 		}
-	}
-	set_bkg_tiles((x) & 31, (y) & 31, 1, height, tile_buffer);	
-	
+	}	
+	set_bkg_tiles(x & 31, y & 31, 1, height, tile_buffer);	
 #ifdef CGB
     if (_is_CGB) {  // Color Column Load
         VBK_REG = 1;
-		for (UBYTE i = 0; i < height; i++) {
-			if (curr_meta_tile_bank){
-				tile_buffer[i] = get_metatile_attr(VRAM_OFFSET(x, y + i));
-			} else {
-				MemcpyBanked(tile_buffer + i, image_attr_ptr + (((i + y) * image_tile_width) + x), 1, image_attr_bank);
+		if (metatile_attr_bank){
+			for (UBYTE i = 0; i < height; i++) {			
+				tile_buffer[i] = ReadBankedUBYTE(metatile_attr_ptr + sram_map_data[VRAM_OFFSET(x, y + i)], metatile_attr_bank);
 			}
-		}		
-		set_bkg_tiles((x) & 31, (y) & 31, 1, height, tile_buffer);
+		} else {
+			for (UBYTE i = 0; i < height; i++) {
+				tile_buffer[i] = ReadBankedUBYTE(image_attr_ptr + (UWORD)(((i + y) * image_tile_width) + x), image_attr_bank);			
+			}	
+		}
+		set_bkg_tiles(x & 31, y & 31, 1, height, tile_buffer);
         VBK_REG = 0;
     }
 #endif
@@ -311,34 +306,32 @@ void scroll_load_col(UBYTE x, UBYTE y, UBYTE height) BANKED {
 
 void scroll_load_pending_col(void) BANKED {
     UBYTE height = MIN(pending_h_i, PENDING_BATCH_SIZE);
-	
     // DMG Column Load	
-	uint16_t vram_offset = 0;
-	for (UBYTE i = 0; i < height; i++) {		
-		MemcpyBanked(tile_buffer + i, image_ptr + (((i + pending_h_y) * image_tile_width) + pending_h_x), 1, image_bank);
-		if (curr_meta_tile_bank){
-			vram_offset = VRAM_OFFSET(pending_h_x, pending_h_y + i);
-			memcpy(sram_map_data + vram_offset, tile_buffer + i, 1);
-			tile_buffer[i] = get_metatile_tile_id(vram_offset);
+	for (UBYTE i = 0; i < height; i++) {	
+		tile_buffer[i] = ReadBankedUBYTE(image_ptr + (UWORD)(((i + pending_h_y) * image_tile_width) + pending_h_x), image_bank);
+		if (metatile_bank){
+			sram_map_data[VRAM_OFFSET(pending_h_x, pending_h_y + i)] = tile_buffer[i];
+			tile_buffer[i] = ReadBankedUBYTE(metatile_ptr + tile_buffer[i], metatile_bank);	
 		}
-	}
-	set_bkg_tiles((pending_h_x) & 31, (pending_h_y) & 31, 1, height, tile_buffer);
-	
+	}	
+	set_bkg_tiles(pending_h_x & 31, pending_h_y & 31, 1, height, tile_buffer);	
 #ifdef CGB
     if (_is_CGB) {  // Color Column Load
         VBK_REG = 1;
-		for (UBYTE i = 0; i < height; i++) {
-			if (curr_meta_tile_bank){
-				tile_buffer[i] = get_metatile_attr(VRAM_OFFSET(pending_h_x, pending_h_y + i));
-			} else {
-				MemcpyBanked(tile_buffer + i, image_attr_ptr + (((i + pending_h_y) * image_tile_width) + pending_h_x), 1, image_attr_bank);
+		if (metatile_attr_bank){
+			for (UBYTE i = 0; i < height; i++) {			
+				tile_buffer[i] = ReadBankedUBYTE(metatile_attr_ptr + sram_map_data[VRAM_OFFSET(pending_h_x, pending_h_y + i)], metatile_attr_bank);
 			}
-		}	
-		set_bkg_tiles((pending_h_x) & 31, (pending_h_y) & 31, 1, height, tile_buffer);
+		} else {
+			for (UBYTE i = 0; i < height; i++) {
+				tile_buffer[i] = ReadBankedUBYTE(image_attr_ptr + (UWORD)(((i + pending_h_y) * image_tile_width) + pending_h_x), image_attr_bank);			
+			}	
+		}
+		set_bkg_tiles(pending_h_x & 31, pending_h_y & 31, 1, height, tile_buffer);
         VBK_REG = 0;
     }
 #endif
-
     pending_h_y += height;
-    pending_h_i -= height;
+    pending_h_i -= height;	
 }
+

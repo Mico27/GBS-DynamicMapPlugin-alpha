@@ -53,6 +53,6 @@ export const compile = (input, helpers) => {
   _stackPush(tmp1);
   _stackPush(tmp0);
   		
-  _callNative("get_sram_tile_id_at_pos");
+  _callNative("vm_get_sram_tile_id_at_pos");
   _stackPop(3);   
 };
