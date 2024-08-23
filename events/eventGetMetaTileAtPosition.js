@@ -1,6 +1,6 @@
 export const id = "EVENT_GET_META_TILE_AT_POS";
 export const name = "Get meta tile at position";
-export const groups = ["EVENT_GROUP_MISC"];
+export const groups = ["Meta Tiles"];
 
 export const autoLabel = (fetchArg) => {
   return `Get meta tile at position`;

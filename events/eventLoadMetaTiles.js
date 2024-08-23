@@ -1,6 +1,6 @@
 export const id = "EVENT_LOAD_META_TILES";
 export const name = "Load meta tiles";
-export const groups = ["EVENT_GROUP_MISC"];
+export const groups = ["Meta Tiles"];
 
 export const autoLabel = (fetchArg) => {
   return `Load meta tiles`;

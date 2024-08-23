@@ -1,6 +1,6 @@
 export const id = "EVENT_REPLACE_META_TILE";
 export const name = "Replace meta tile";
-export const groups = ["EVENT_GROUP_MISC"];
+export const groups = ["Meta Tiles"];
 
 export const autoLabel = (fetchArg) => {
   return `Assign meta tiles`;

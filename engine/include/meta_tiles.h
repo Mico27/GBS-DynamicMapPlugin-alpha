@@ -5,6 +5,8 @@
 
 #include <gbdk/platform.h>
 #include "gbs_types.h"
+#include "vm.h"
+#include "actor.h"
 
 #define MAX_MAP_DATA_SIZE 1024 //32x32 basically mirrors the tilemap VRAM data
 
@@ -20,5 +22,9 @@ extern UBYTE metatile_collision_bank;
 extern unsigned char* metatile_collision_ptr;
 
 void replace_meta_tile(UBYTE x, UBYTE y, UBYTE tile_id) BANKED;
+void on_actor_metatile_changed(UBYTE actor_idx) BANKED;
+void on_actor_metatile_collision(UBYTE actor_idx, UBYTE tile_x, UBYTE tile_y, UBYTE direction) BANKED;
+void reset_collision_cache(UBYTE actor_idx, UBYTE direction) BANKED;
+SCRIPT_CTX * create_script_context(void) BANKED;
 
 #endif
