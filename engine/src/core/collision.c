@@ -56,5 +56,5 @@ UBYTE tile_at(UBYTE tx, UBYTE ty) BANKED {
 			return ReadBankedUBYTE(collision_ptr + (ty * (UINT16)image_tile_width) + tx, collision_bank);
 		}
 	}
-    return COLLISION_ALL;
+    return 0;//COLLISION_ALL;
 }

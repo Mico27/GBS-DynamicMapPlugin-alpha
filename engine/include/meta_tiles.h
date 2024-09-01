@@ -21,10 +21,9 @@ extern unsigned char* metatile_attr_ptr;
 extern UBYTE metatile_collision_bank;
 extern unsigned char* metatile_collision_ptr;
 
+
 void replace_meta_tile(UBYTE x, UBYTE y, UBYTE tile_id) BANKED;
-void on_actor_metatile_changed(UBYTE actor_idx) BANKED;
-void on_actor_metatile_collision(UBYTE actor_idx, UBYTE tile_x, UBYTE tile_y, UBYTE direction) BANKED;
-void reset_collision_cache(UBYTE actor_idx, UBYTE direction) BANKED;
+
 SCRIPT_CTX * create_script_context(void) BANKED;
 
 #endif

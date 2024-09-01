@@ -100,20 +100,21 @@ UBYTE scroll_viewport(parallax_row_t * port) BANKED {
 
         port->shadow_scx = shift_scroll_x;        
         UBYTE shift_col = shift_scroll_x >> 3;
-
-        // If column is +/- 1 just render next column
-        if (current_col == new_col - 1) {
-            // Render right column
-            UBYTE x = shift_col - SCREEN_PAD_LEFT + SCREEN_TILE_REFRES_W - 1;
-            scroll_load_col(x, port->start_tile, port->tile_height);
-        } else if (current_col == new_col + 1) {
-            // Render left column
-            UBYTE x = MAX(0, shift_col - SCREEN_PAD_LEFT);
-            scroll_load_col(x, port->start_tile, port->tile_height);
-        } else if (current_col != new_col) {
-            // If column differs by more than 1 render entire viewport
-            scroll_render_rows(shift_scroll_x, 0, port->start_tile, port->tile_height);
-        }  
+		if (shift_col){
+			// If column is +/- 1 just render next column
+			if (current_col == new_col - 1) {
+				// Render right column
+				UBYTE x = shift_col - SCREEN_PAD_LEFT + SCREEN_TILE_REFRES_W - 1;
+				scroll_load_col(x, port->start_tile, port->tile_height);
+			} else if (current_col == new_col + 1) {
+				// Render left column
+				UBYTE x = MAX(0, shift_col - SCREEN_PAD_LEFT);
+				scroll_load_col(x, port->start_tile, port->tile_height);
+			} else if (current_col != new_col) {
+				// If column differs by more than 1 render entire viewport
+				scroll_render_rows(shift_scroll_x, 0, port->start_tile, port->tile_height);
+			}  
+		}
         return FALSE;   
     } else {
         // last parallax slice OR no parallax
