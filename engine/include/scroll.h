@@ -10,12 +10,12 @@
 #define SCREEN_TILES_W 20  // 160 >> 3 = 20
 #define SCREEN_TILES_H 18  // 144 >> 3 = 18
 #define SCREEN_PAD_LEFT 1
-#define SCREEN_PAD_RIGHT 2
+#define SCREEN_PAD_RIGHT 3
 #define SCREEN_PAD_TOP 1
 #define SCREEN_PAD_BOTTOM 1
 #define SCREEN_TILE_REFRES_W (SCREEN_TILES_W + SCREEN_PAD_LEFT + SCREEN_PAD_RIGHT)
 #define SCREEN_TILE_REFRES_H (SCREEN_TILES_H + SCREEN_PAD_TOP + SCREEN_PAD_BOTTOM)
-#define PENDING_BATCH_SIZE 8
+#define PENDING_BATCH_SIZE 4
 
 extern INT16 scroll_x;
 extern INT16 scroll_y;
@@ -53,7 +53,7 @@ UBYTE scroll_viewport(parallax_row_t * port) BANKED;
 void scroll_queue_row(UBYTE x, UBYTE y) BANKED;
 void scroll_queue_col(UBYTE x, UBYTE y) BANKED;
 void scroll_load_pending_row(void) BANKED;
-void scroll_load_pending_col(void) BANKED;
+void scroll_load_pending_col(void) NONBANKED;
 void scroll_load_row(UBYTE x, UBYTE y) BANKED;
 void scroll_load_col(UBYTE x, UBYTE y, UBYTE height) BANKED;
 

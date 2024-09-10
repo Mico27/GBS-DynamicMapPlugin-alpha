@@ -37,6 +37,8 @@ void vm_load_meta_tiles(SCRIPT_CTX * THIS) OLDCALL BANKED {
     metatile_attr_bank = bkg.cgb_tilemap_attr.bank;
     metatile_attr_ptr = bkg.cgb_tilemap_attr.ptr;
 	
+	memset(sram_map_data, 0, sizeof(sram_map_data));
+	
 	scroll_reset();
 	scroll_update();
 }

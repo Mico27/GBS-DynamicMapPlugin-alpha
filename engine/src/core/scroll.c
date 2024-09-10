@@ -279,24 +279,36 @@ void scroll_load_row(UBYTE x, UBYTE y) BANKED {
 
 void scroll_load_col(UBYTE x, UBYTE y, UBYTE height) BANKED {	
 	// DMG Column Load	
-	for (UBYTE i = 0; i < height; i++) {	
-		tile_buffer[i] = ReadBankedUBYTE(image_ptr + (UWORD)(((i + y) * image_tile_width) + x), image_bank);
-		if (metatile_bank){
-			sram_map_data[VRAM_OFFSET(x, y + i)] = tile_buffer[i];
-			tile_buffer[i] = ReadBankedUBYTE(metatile_ptr + tile_buffer[i], metatile_bank);	
-		}
+	UBYTE i;
+	UWORD vram_offset;
+	UBYTE * column_pointer = (image_ptr + (UWORD)((y * image_tile_width) + x));
+	for (i = 0; i < height; i++) {			
+		tile_buffer[i] = ReadBankedUBYTE(column_pointer, image_bank);	
+		column_pointer += image_tile_width;	
 	}	
+	if (metatile_bank){
+		vram_offset = VRAM_OFFSET(x, y);		
+		for (i = 0; i < height; i++) {						
+			sram_map_data[vram_offset] = tile_buffer[i];
+			tile_buffer[i] = ReadBankedUBYTE(metatile_ptr + (UWORD)tile_buffer[i], metatile_bank);
+			vram_offset += 32;
+		}	
+	}
 	set_bkg_tiles(x & 31, y & 31, 1, height, tile_buffer);	
 #ifdef CGB
     if (_is_CGB) {  // Color Column Load
         VBK_REG = 1;
 		if (metatile_attr_bank){
-			for (UBYTE i = 0; i < height; i++) {			
-				tile_buffer[i] = ReadBankedUBYTE(metatile_attr_ptr + sram_map_data[VRAM_OFFSET(x, y + i)], metatile_attr_bank);
+			vram_offset = VRAM_OFFSET(x, y);
+			for (i = 0; i < height; i++) {			
+				tile_buffer[i] = ReadBankedUBYTE(metatile_attr_ptr + (UWORD)sram_map_data[vram_offset], metatile_attr_bank);
+				vram_offset += 32;
 			}
 		} else {
-			for (UBYTE i = 0; i < height; i++) {
-				tile_buffer[i] = ReadBankedUBYTE(image_attr_ptr + (UWORD)(((i + y) * image_tile_width) + x), image_attr_bank);			
+			column_pointer = (image_attr_ptr + (UWORD)((y * image_tile_width) + x));
+			for (i = 0; i < height; i++) {
+				tile_buffer[i] = ReadBankedUBYTE(column_pointer, image_attr_bank);	
+				column_pointer += image_tile_width;			
 			}	
 		}
 		set_bkg_tiles(x & 31, y & 31, 1, height, tile_buffer);
@@ -305,27 +317,44 @@ void scroll_load_col(UBYTE x, UBYTE y, UBYTE height) BANKED {
 #endif
 }
 
-void scroll_load_pending_col(void) BANKED {
+void scroll_load_pending_col(void) NONBANKED {
+	UINT8 _save = CURRENT_BANK;	
     UBYTE height = MIN(pending_h_i, PENDING_BATCH_SIZE);
+	UBYTE i;
+	UWORD vram_offset;
+	SWITCH_ROM(image_bank);
     // DMG Column Load	
-	for (UBYTE i = 0; i < height; i++) {	
-		tile_buffer[i] = ReadBankedUBYTE(image_ptr + (UWORD)(((i + pending_h_y) * image_tile_width) + pending_h_x), image_bank);
-		if (metatile_bank){
-			sram_map_data[VRAM_OFFSET(pending_h_x, pending_h_y + i)] = tile_buffer[i];
-			tile_buffer[i] = ReadBankedUBYTE(metatile_ptr + tile_buffer[i], metatile_bank);	
-		}
+	UBYTE * column_pointer = (image_ptr + (UWORD)((pending_h_y * image_tile_width) + pending_h_x));
+	for (i = 0; i < height; i++) {			
+		tile_buffer[i] = *column_pointer;	
+		column_pointer += image_tile_width;		
 	}	
+	if (metatile_bank){
+		SWITCH_ROM(metatile_bank);	
+		vram_offset = VRAM_OFFSET(pending_h_x, pending_h_y);		
+		for (i = 0; i < height; i++) {						
+			sram_map_data[vram_offset] = tile_buffer[i];
+			tile_buffer[i] = *(metatile_ptr + (UWORD)tile_buffer[i]);
+			vram_offset += 32;
+		}	
+	}
 	set_bkg_tiles(pending_h_x & 31, pending_h_y & 31, 1, height, tile_buffer);	
 #ifdef CGB
     if (_is_CGB) {  // Color Column Load
-        VBK_REG = 1;
+        VBK_REG = 1;		
 		if (metatile_attr_bank){
-			for (UBYTE i = 0; i < height; i++) {			
-				tile_buffer[i] = ReadBankedUBYTE(metatile_attr_ptr + sram_map_data[VRAM_OFFSET(pending_h_x, pending_h_y + i)], metatile_attr_bank);
+			SWITCH_ROM(metatile_attr_bank);
+			vram_offset = VRAM_OFFSET(pending_h_x, pending_h_y);
+			for (i = 0; i < height; i++) {			
+				tile_buffer[i] = *(metatile_attr_ptr + (UWORD)sram_map_data[vram_offset]);
+				vram_offset += 32;
 			}
 		} else {
-			for (UBYTE i = 0; i < height; i++) {
-				tile_buffer[i] = ReadBankedUBYTE(image_attr_ptr + (UWORD)(((i + pending_h_y) * image_tile_width) + pending_h_x), image_attr_bank);			
+			SWITCH_ROM(image_attr_bank);
+			column_pointer = (image_attr_ptr + (UWORD)((pending_h_y * image_tile_width) + pending_h_x));
+			for (i = 0; i < height; i++) {
+				tile_buffer[i] = *column_pointer;	
+				column_pointer += image_tile_width;			
 			}	
 		}
 		set_bkg_tiles(pending_h_x & 31, pending_h_y & 31, 1, height, tile_buffer);
@@ -334,5 +363,6 @@ void scroll_load_pending_col(void) BANKED {
 #endif
     pending_h_y += height;
     pending_h_i -= height;	
+	 SWITCH_ROM(_save);
 }
 
