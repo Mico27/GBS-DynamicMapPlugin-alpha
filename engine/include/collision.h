@@ -25,7 +25,7 @@ typedef struct bounding_box_t {
  * @param point Pointer to position to look for within bounding box
  * @return Point is within bounding box
  */
-UBYTE bb_contains(bounding_box_t *bb, upoint16_t *offset, upoint16_t *point) BANKED;
+UBYTE bb_contains(bounding_box_t *bb, point16_t *offset, point16_t *point) BANKED;
 
 /**
  * Check if two positioned bounding boxes intersect.
@@ -36,7 +36,7 @@ UBYTE bb_contains(bounding_box_t *bb, upoint16_t *offset, upoint16_t *point) BAN
  * @param offset_b Pointer to position offset for bounding box B
  * @return Positioned bounding boxes intersect
  */
-UBYTE bb_intersects(bounding_box_t *bb_a, upoint16_t *offset_a, bounding_box_t *bb_b, upoint16_t *offset_b) BANKED;
+UBYTE bb_intersects(bounding_box_t *bb_a, point16_t *offset_a, bounding_box_t *bb_b, point16_t *offset_b) BANKED;
 
 /**
  * Return collision tile value at given tile x,y coordinate.
