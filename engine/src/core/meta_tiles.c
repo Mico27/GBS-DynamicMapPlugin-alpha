@@ -11,7 +11,8 @@
 #include "actor.h"
 #include "data/game_globals.h"
 
-uint8_t __at(0xA000) sram_map_data[MAX_MAP_DATA_SIZE];
+uint8_t __at(0xBB00) sram_collision_data[256];
+uint8_t __at(0xBC00) sram_map_data[MAX_MAP_DATA_SIZE];
 
 UBYTE metatile_bank;
 unsigned char* metatile_ptr;
@@ -36,6 +37,8 @@ void vm_load_meta_tiles(SCRIPT_CTX * THIS) OLDCALL BANKED {
     metatile_ptr = bkg.tilemap.ptr;
     metatile_attr_bank = bkg.cgb_tilemap_attr.bank;
     metatile_attr_ptr = bkg.cgb_tilemap_attr.ptr;
+	
+	MemcpyBanked(&sram_collision_data, metatile_collision_ptr, 256, metatile_collision_bank);
 	
 	memset(sram_map_data, 0, sizeof(sram_map_data));
 	
