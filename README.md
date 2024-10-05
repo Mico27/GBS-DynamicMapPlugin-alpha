@@ -24,7 +24,7 @@ Then you will create the metatile background, which will create all the unique m
 
 Then in the metatile scene, you can set the palettes and collision data for each of those tiles.
 
-Then, you main scene's background will use the tile from the tileset that will match the metatile that will be used.
+Then, your main scene's background will use the tile from the tileset that will match the metatile that will be used.
 
 ![1-1](https://github.com/user-attachments/assets/463da62f-b9c1-4ae5-9297-887aa6392fd3)
 
