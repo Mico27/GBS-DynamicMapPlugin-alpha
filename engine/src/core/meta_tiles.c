@@ -59,6 +59,54 @@ void vm_get_sram_tile_id_at_pos(SCRIPT_CTX * THIS) OLDCALL BANKED {
 	script_memory[*(int16_t*)VM_REF_TO_PTR(FN_ARG2)] = sram_map_data[VRAM_OFFSET(x, y)];	
 }
 
+
+void vm_submap_metatiles(SCRIPT_CTX * THIS) OLDCALL BANKED {	
+	uint8_t source_x = *(int8_t*)VM_REF_TO_PTR(FN_ARG0);
+	uint8_t source_y = *(int8_t*)VM_REF_TO_PTR(FN_ARG1);
+	uint8_t dest_x = *(int8_t*)VM_REF_TO_PTR(FN_ARG2);
+	uint8_t dest_y = *(int8_t*)VM_REF_TO_PTR(FN_ARG3);
+	uint8_t width = *(int8_t*)VM_REF_TO_PTR(FN_ARG4) & 31;
+	uint8_t height = *(int8_t*)VM_REF_TO_PTR(FN_ARG5) & 31;
+	uint8_t scene_bank = *(uint8_t *) VM_REF_TO_PTR(FN_ARG6);
+	const scene_t * scene_ptr = *(scene_t **) VM_REF_TO_PTR(FN_ARG7);		
+	scene_t scn;
+    MemcpyBanked(&scn, scene_ptr, sizeof(scn), scene_bank);
+	background_t bkg;
+    MemcpyBanked(&bkg, scn.background.ptr, sizeof(bkg), scn.background.bank);
+    unsigned char* tilemap_ptr = bkg.tilemap.ptr;
+	unsigned char* tilemap_attr_ptr = bkg.cgb_tilemap_attr.ptr;		
+	
+	UBYTE buffer_size = sizeof(UBYTE) * width;
+	for (uint8_t i = 0; i < height; i++){		
+		int16_t offset = ((source_y + i) * (int16_t)bkg.width) + source_x;	
+		UBYTE current_y = (dest_y + i);
+		// DMG Row Load
+		MemcpyBanked(tile_buffer, tilemap_ptr + offset, buffer_size, bkg.tilemap.bank);
+		if (metatile_bank){
+			for (UBYTE j = 0; j < width; j++) {
+				sram_map_data[VRAM_OFFSET(dest_x + j, current_y)] = tile_buffer[j];
+				tile_buffer[j] = ReadBankedUBYTE(metatile_ptr + tile_buffer[j], metatile_bank);
+			}
+		}
+		set_bkg_tiles(dest_x & 31, current_y & 31, width, 1, tile_buffer);
+		#ifdef CGB
+			if (_is_CGB) {  // Color Column Load
+				VBK_REG = 1;		
+				if (metatile_attr_bank){
+					for (UBYTE j = 0; j < width; j++) {
+						tile_buffer[j] = ReadBankedUBYTE(metatile_attr_ptr + sram_map_data[VRAM_OFFSET(dest_x + j, current_y)], metatile_attr_bank);
+					}
+				} else {
+					MemcpyBanked(tile_buffer, tilemap_attr_ptr + offset, width, bkg.cgb_tilemap_attr.bank);
+				}
+				set_bkg_tiles(dest_x & 31, current_y & 31, width, 1, tile_buffer);
+				VBK_REG = 0;
+			}
+		#endif
+	}
+	
+}
+
 void replace_meta_tile(UBYTE x, UBYTE y, UBYTE tile_id) BANKED {
 	sram_map_data[VRAM_OFFSET(x, y)] = tile_id;		
 #ifdef CGB

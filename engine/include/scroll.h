@@ -27,6 +27,7 @@ extern BYTE scroll_offset_x;
 extern BYTE scroll_offset_y;
 extern UINT8 pending_w_i;
 extern UINT8 pending_h_i;
+extern UBYTE tile_buffer[SCREEN_TILE_REFRES_W];
 
 /**
  * Resets scroll settings on engine start

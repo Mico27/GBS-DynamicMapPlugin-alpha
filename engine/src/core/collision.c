@@ -49,13 +49,16 @@ UBYTE bb_intersects(bounding_box_t *bb_a, point16_t *offset_a, bounding_box_t *b
  * @return Tile value, 0 if no collisions, COLLISION_ALL if out of bounds
  */
 UBYTE tile_at(UBYTE tx, UBYTE ty) BANKED {
-	if ((tx < image_tile_width) && (ty < image_tile_height)) {
-		if (metatile_collision_bank) {
-			//return ReadBankedUBYTE(metatile_collision_ptr + sram_map_data[VRAM_OFFSET(tx, ty)], metatile_collision_bank);
-			return sram_collision_data[sram_map_data[VRAM_OFFSET(tx, ty)]];
-		} else {
-			return ReadBankedUBYTE(collision_ptr + (ty * (UINT16)image_tile_width) + tx, collision_bank);
+	if (tx < image_tile_width) {
+		if (ty < image_tile_height) {
+			if (metatile_collision_bank) {
+				//return ReadBankedUBYTE(metatile_collision_ptr + sram_map_data[VRAM_OFFSET(tx, ty)], metatile_collision_bank);
+				return sram_collision_data[sram_map_data[VRAM_OFFSET(tx, ty)]];
+			} else {
+				return ReadBankedUBYTE(collision_ptr + (ty * (UINT16)image_tile_width) + tx, collision_bank);
+			}
 		}
+		return 0;
 	}
-    return 0;//COLLISION_ALL;
+    return COLLISION_ALL;
 }
