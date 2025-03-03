@@ -1,6 +1,9 @@
 # GBS-DynamicMapPlugin-alpha
  Dynamic map plugin (alpha)
 
+ NOTE: IT IS NOW RECOMMENDED TO USE THIS PLUGIN INSTEAD: https://github.com/Mico27/gbs-MetatilePlugin
+THIS ONE SUPPORTS ALSO COLOR-ONLY MODE, IS EASIER TO USE, MORE OPTIMIZED AND WITH MORE FEATURES.
+
 (WARNING: this plugin works for mono and color mode but not for color-only mode due to the VRAM tileset bank split)
 The goal of this plugin is to be able to add the concept of metatiles to GBS
 The concept of metatiles is to be able to create a set of specific tiles with specific data on it (like collision, palette, etc) while being able to read and edit those metatile in RAM.
